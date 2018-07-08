@@ -9,7 +9,7 @@ var Enemy = function() {
     this.sprite = 'images/enemy-bug.png';
     // Enemy init position is 1st-3rd row (random), and out of canvas
     this.x = -202;
-    this.y = 83 * (Math.floor(Math.random() * Math.floor(3))) + 55;
+    this.y = 83 * (Math.floor(Math.random() * Math.floor(3))) + 45;
     // Enemy speed value random 1 - 3
     this.speed = Math.floor(Math.random() * Math.floor(3)) + 1;
 };
@@ -22,7 +22,9 @@ Enemy.prototype.update = function(dt) {
     // all computers.
     this.x += 100 * this.speed * dt;
     // Collision detection
-    if (this.x > player.x - 60) {
+    if (this.y === player.y && (
+      (this.x > player.x - 60 && this.x < player.x - 50) ||
+      (player.x > this.x - 40 && player.x < this.x))) {
       player.reset();
     }
     // Destroy Enemy object if it has left the game area
