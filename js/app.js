@@ -1,4 +1,8 @@
-// Enemies our player must avoid
+
+/*
+*  ENEMY OBJECT
+*/
+
 var Enemy = function() {
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
@@ -21,6 +25,10 @@ Enemy.prototype.update = function(dt) {
     if (this.x > player.x - 60) {
       player.reset();
     }
+    // Destroy Enemy object if it has left the game area
+    if (this.x > 600) {
+      destroyEnemy(this);
+    }
 };
 
 // Draw the enemy on the screen, required method for game
@@ -28,7 +36,11 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-// The Player object
+
+/*
+*  PLAYER OBJECT
+*/
+
 var Player = function() {
   this.sprite = 'images/char-boy.png';
   // Player init position is in 5th row, 3rd column
@@ -72,21 +84,43 @@ Player.prototype.handleInput = function(keyPressed) {
 Player.prototype.reset = function () {
   this.x = (2 * 101);
   this.y = (4 * 83) + 45;
-}
+};
 
 // Draw the Player on the screen, required method for game
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-// Instantiate enemy and player objects.
-var player = new Player();
-var allEnemies = [];
 
-// TODO continous enemy creation
-var nmy = new Enemy();
-allEnemies.push(nmy);
+/*
+*  HELPER FUNCTIONS
+*/
 
+function createEnemy() {
+  allEnemies.push(new Enemy())
+};
+
+function destroyEnemy(nme) {
+  target = allEnemies.indexOf(nme);
+  allEnemies.splice(target, 1);
+}
+
+// Timer for periodically creating enemies
+function stopWatch(ctrl) {
+  if (ctrl === 'start') {
+    timer = setTimeout(tick, 1000);
+  } else if (ctrl === 'stop'){
+    clearTimeout(timer);
+  } else {
+    timer = setTimeout(tick, 1000);
+  }
+}
+// increment the seconds counter by 1
+// create an Enemy
+function tick() {
+  createEnemy()
+  stopWatch();
+}
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
@@ -100,3 +134,12 @@ document.addEventListener('keyup', function(e) {
 
     player.handleInput(allowedKeys[e.keyCode]);
 });
+
+
+/*
+*  START GAME
+*/
+
+var player = new Player();
+var allEnemies = [];
+stopWatch('start');
