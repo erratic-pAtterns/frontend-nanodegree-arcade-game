@@ -35,11 +35,14 @@ Player.prototype.update = function() {
   // noop
 };
 
+// Update player position upon allowed keypress
+// Limit player character position to game area
 Player.prototype.handleInput = function(keyPressed) {
-  // TODO limit movement inside of game area
   switch (keyPressed) {
     case 'left':
-      this.x -= 101;
+      if (this.x - 101 > -1) {
+        this.x -= 101;
+      }
       break
     case 'up':
       this.y -= 83;
@@ -49,10 +52,14 @@ Player.prototype.handleInput = function(keyPressed) {
       }
       break
     case 'right':
-      this.x += 101;
+      if (this.x + 101 < 420) {
+        this.x += 101;
+      }
       break
     case 'down':
-      this.y += 83;
+      if (this.y + 83 < 420) {
+        this.y += 83;
+      }
   }
 };
 
