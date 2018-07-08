@@ -5,7 +5,9 @@ var Enemy = function() {
     this.sprite = 'images/enemy-bug.png';
     // Enemy init position is 1st-3rd row (random), and out of canvas
     this.x = -202;
-    this.y = (83 * (Math.floor(Math.random() * Math.floor(3)))) + 55;
+    this.y = 83 * (Math.floor(Math.random() * Math.floor(3))) + 55;
+    // Enemy speed value random 1 - 3
+    this.speed = Math.floor(Math.random() * Math.floor(3)) + 1;
 };
 
 // Update the enemy's position, required method for game
@@ -14,8 +16,11 @@ Enemy.prototype.update = function(dt) {
     // Multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
-    this.x += 60 * dt;
-    // TODO collision detection
+    this.x += 100 * this.speed * dt;
+    // Collision detection
+    if (this.x > player.x - 60) {
+      player.reset();
+    }
 };
 
 // Draw the enemy on the screen, required method for game
@@ -23,7 +28,7 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-// The Player character
+// The Player object
 var Player = function() {
   this.sprite = 'images/char-boy.png';
   // Player init position is in 5th row, 3rd column
