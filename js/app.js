@@ -1,12 +1,9 @@
 // Enemies our player must avoid
 var Enemy = function() {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
-
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
-    // Enemy init position is 1st-3rd row, out of canvas
+    // Enemy init position is 1st-3rd row (random), and out of canvas
     this.x = -202;
     this.y = (83 * (Math.floor(Math.random() * Math.floor(3)))) + 55;
 };
@@ -26,9 +23,7 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
+// The Player character
 var Player = function() {
   this.sprite = 'images/char-boy.png';
   // Player init position is in 5th row, 3rd column
@@ -42,13 +37,16 @@ Player.prototype.update = function() {
 
 Player.prototype.handleInput = function(keyPressed) {
   // TODO limit movement inside of game area
-  // TODO reset game when player has reached water
   switch (keyPressed) {
     case 'left':
       this.x -= 101;
       break
     case 'up':
       this.y -= 83;
+      // Reset player position when player reaches water
+      if (this.y < 0) {
+        this.reset();
+      }
       break
     case 'right':
       this.x += 101;
@@ -57,6 +55,12 @@ Player.prototype.handleInput = function(keyPressed) {
       this.y += 83;
   }
 };
+
+// Reset player to start position
+Player.prototype.reset = function () {
+  this.x = (2 * 101);
+  this.y = (4 * 83) + 45;
+}
 
 // Draw the Player on the screen, required method for game
 Player.prototype.render = function() {
