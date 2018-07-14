@@ -22,14 +22,14 @@ Enemy.prototype.update = function(dt) {
     // all computers.
     this.x += 100 * this.speed * dt;
     // Collision detection
-    if (this.y === player.y && (
-      (this.x > player.x - 60 && this.x < player.x - 50) ||
-      (player.x > this.x - 40 && player.x < this.x))) {
-      player.reset();
+    if (this.y === game.player.y && (
+      (this.x > game.player.x - 60 && this.x < game.player.x - 50) ||
+      (game.player.x > this.x - 40 && game.player.x < this.x))) {
+      game.player.reset();
     }
     // Destroy Enemy object if it has left the game area
     if (this.x > 600) {
-      destroyEnemy(this);
+      game.destroyEnemy(this);
     }
 };
 
@@ -95,34 +95,51 @@ Player.prototype.render = function() {
 
 
 /*
-*  HELPER FUNCTIONS
+*  GAME OBJECT
 */
 
-function createEnemy() {
-  allEnemies.push(new Enemy())
+function Game() {
+  this.allEnemies = [];
+  this.player = new Player();
+  this.score = 0;
+}
+
+Game.prototype.createEnemy = function() {
+  this.allEnemies.push(new Enemy());
 };
 
-function destroyEnemy(nme) {
-  target = allEnemies.indexOf(nme);
-  allEnemies.splice(target, 1);
+Game.prototype.destroyEnemy = function(nme) {
+  target = this.allEnemies.indexOf(nme);
+  this.allEnemies.splice(target, 1);
 }
 
 // Timer for periodically creating enemies
-function stopWatch(ctrl) {
+Game.prototype.stopWatch = function(ctrl) {
   if (ctrl === 'start') {
-    timer = setTimeout(tick, 1000);
+    timer = setTimeout(this.tick.bind(this), 1000);
   } else if (ctrl === 'stop'){
     clearTimeout(timer);
   } else {
-    timer = setTimeout(tick, 1000);
+    timer = setTimeout(this.tick.bind(this), 1000);
   }
 }
+
 // increment the seconds counter by 1
 // create an Enemy
-function tick() {
-  createEnemy()
-  stopWatch();
+Game.prototype.tick = function() {
+  this.createEnemy();
+  this.stopWatch();
 }
+
+// Start game
+Game.prototype.start = function() {
+  this.stopWatch('start');
+}
+
+
+/*
+*  EVENT LISTENERS
+*/
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
@@ -134,7 +151,7 @@ document.addEventListener('keyup', function(e) {
         40: 'down'
     };
 
-    player.handleInput(allowedKeys[e.keyCode]);
+    game.player.handleInput(allowedKeys[e.keyCode]);
 });
 
 
@@ -142,6 +159,5 @@ document.addEventListener('keyup', function(e) {
 *  START GAME
 */
 
-var player = new Player();
-var allEnemies = [];
-stopWatch('start');
+var game = new Game();
+game.start();
