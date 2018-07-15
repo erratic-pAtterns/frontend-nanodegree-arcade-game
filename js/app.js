@@ -1,4 +1,3 @@
-
 /*
 *  ENEMY OBJECT
 */
@@ -29,7 +28,7 @@ Enemy.prototype.update = function(dt) {
     }
     // Destroy Enemy object if it has left the game area
     if (this.x > 600) {
-      game.destroyEnemy(this);
+      game.destroyObj(this, game.allEnemies);
     }
 };
 
@@ -95,23 +94,61 @@ Player.prototype.render = function() {
 
 
 /*
+*  GEM OBJECT
+*/
+
+var Gem = function() {
+  this.allSprites = [
+    'images/Gem Orange.png',
+    'images/Gem Green.png',
+    'images/Gem Blue.png'
+  ];
+  this.sprite = this.allSprites[Math.floor(Math.random() * this.allSprites.length)];
+  this.x = 101 * (Math.floor(Math.random() * Math.floor(5)));
+  this.y = 83 * (Math.floor(Math.random() * Math.floor(3))) + 45;
+};
+
+Gem.prototype.update = function() {
+    this.checkCollisions();
+};
+
+Gem.prototype.checkCollisions = function() {
+    if (this.x === game.player.x && this.y === game.player.y) {
+      game.destroyObj(this, game.allGems);
+      game.scorePlusOne();
+    };
+};
+
+// Draw the Player on the screen, required method for game
+Gem.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+
+/*
+* TODO ROCK
+*/
+
+
+/*
 *  GAME OBJECT
 */
 
-function Game() {
+var Game = function() {
   this.allEnemies = [];
+  this.allGems = [];
   this.player = new Player();
   this.score = 0;
-}
-
-Game.prototype.createEnemy = function() {
-  this.allEnemies.push(new Enemy());
 };
 
-Game.prototype.destroyEnemy = function(nme) {
-  target = this.allEnemies.indexOf(nme);
-  this.allEnemies.splice(target, 1);
-}
+Game.prototype.spawnObj = function(proto, container) {
+  container.push(proto);
+};
+
+Game.prototype.destroyObj = function(obj, container) {
+  target = container.indexOf(obj);
+  container.splice(target, 1);
+};
 
 // Timer for periodically creating enemies
 Game.prototype.stopWatch = function(ctrl) {
@@ -122,19 +159,32 @@ Game.prototype.stopWatch = function(ctrl) {
   } else {
     timer = setTimeout(this.tick.bind(this), 1000);
   }
-}
+};
 
 // increment the seconds counter by 1
 // create an Enemy
 Game.prototype.tick = function() {
-  this.createEnemy();
+  this.spawnObj(new Enemy(), this.allEnemies);
   this.stopWatch();
-}
+};
 
-// Start game
+// incease player score
+Game.prototype.scorePlusOne = function() {
+  this.score += 1;
+};
+
+// Set up and start game
 Game.prototype.start = function() {
+  // Clear gameplay object lists
+  this.allEnemies = [];
+  this.allGems = [];
+  // Spawn n gems
+  for (var n = 3; n > 0; n--) {
+    this.spawnObj(new Gem(), this.allGems);
+  }
+  // Start spawning enemies
   this.stopWatch('start');
-}
+};
 
 
 /*
