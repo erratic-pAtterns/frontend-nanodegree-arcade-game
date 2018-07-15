@@ -20,12 +20,6 @@ Enemy.prototype.update = function(dt) {
     // which will ensure the game runs at the same speed for
     // all computers.
     this.x += 100 * this.speed * dt;
-    // Collision detection
-    if (this.y === game.player.y && (
-      (this.x > game.player.x - 60 && this.x < game.player.x - 50) ||
-      (game.player.x > this.x - 40 && game.player.x < this.x))) {
-      game.player.reset();
-    }
     // Destroy Enemy object if it has left the game area
     if (this.x > 600) {
       game.destroyObj(this, game.allEnemies);
@@ -49,39 +43,81 @@ var Player = function() {
   this.y = (4 * 83) + 45;
 };
 
-Player.prototype.update = function() {
-  // noop
-};
-
-// Update player position upon allowed keypress
-// Limit player character position to game area
-Player.prototype.handleInput = function(keyPressed) {
-  switch (keyPressed) {
-    case 'left':
-      if (this.x - 101 > -1) {
-        this.x -= 101;
+Player.prototype.update = function () {
+  // If hit by enemy, reset player positon
+  for (const enemy of game.allEnemies) {
+    if (enemy.y === this.y) {
+      if (
+        (enemy.x > this.x - 60 && enemy.x < this.x - 50) ||
+        (this.x > enemy.x - 40 && this.x < enemy.x)) {
+        game.player.reset();
+        return;
       }
-      break
-    case 'up':
-      this.y -= 83;
-      // Reset player position when player reaches water
-      if (this.y < 0) {
-        this.reset();
-      }
-      break
-    case 'right':
-      if (this.x + 101 < 420) {
-        this.x += 101;
-      }
-      break
-    case 'down':
-      if (this.y + 83 < 420) {
-        this.y += 83;
-      }
+    }
   }
 };
 
-// Reset player to start position
+// Handle keyboard input
+Player.prototype.handleInput = function(keyPressed) {
+  var x = this.x;
+  var y = this.y;
+
+  switch (keyPressed) {
+    case 'left':
+        x -= 101;
+      break
+    case 'up':
+      y -= 83;
+      break
+    case 'right':
+        x += 101;
+      break
+    case 'down':
+        y += 83;
+  }
+  this.evalPos(x, y);
+};
+
+Player.prototype.evalPos = function(x, y) {
+  // If either side of the map is reached, keep current player positon
+  if (y > 420 || x > 420 || x < -1) {
+    return;
+  }
+
+  // If obstace is in the way, keep current player positon
+  for (const rock of game.allRocks) {
+    if (rock.x === x && rock.y === y) {
+      return;
+    }
+  }
+
+  // If gem is reached, remove gem from map and increment score
+  for (const gem of game.allGems) {
+    if (gem.x === x && gem.y === y) {
+      game.destroyObj(gem, game.allGems);
+      // increment score
+      game.scorePlusOne();
+    }
+  }
+
+  // Reset player position if player has reached water
+  if (y < 0) {
+    this.reset();
+  }
+
+ // Update player position
+  else {
+    this.updatePos(x, y);
+  }
+};
+
+// Update player position
+Player.prototype.updatePos = function(x, y) {
+  this.x = x;
+  this.y = y;
+}
+
+// Reset player position to initial
 Player.prototype.reset = function () {
   this.x = (2 * 101);
   this.y = (4 * 83) + 45;
@@ -108,26 +144,26 @@ var Gem = function() {
   this.y = 83 * (Math.floor(Math.random() * Math.floor(3))) + 45;
 };
 
-Gem.prototype.update = function() {
-    this.checkCollisions();
-};
-
-Gem.prototype.checkCollisions = function() {
-    if (this.x === game.player.x && this.y === game.player.y) {
-      game.destroyObj(this, game.allGems);
-      game.scorePlusOne();
-    };
-};
-
-// Draw the Player on the screen, required method for game
+// Draw the Gem on the screen, required method for game
 Gem.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
 
 /*
-* TODO ROCK
+* ROCK OBJECT
 */
+
+var Rock = function() {
+  this.sprite = 'images/Rock.png';
+  this.x = 101 * (Math.floor(Math.random() * Math.floor(5)));
+  this.y = 83 * (Math.floor(Math.random() * Math.floor(3))) + 45;
+};
+
+// Draw the Player on the screen, required method for game
+Rock.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
 
 
 /*
@@ -178,9 +214,14 @@ Game.prototype.start = function() {
   // Clear gameplay object lists
   this.allEnemies = [];
   this.allGems = [];
+  this.allRocks = [];
   // Spawn n gems
   for (var n = 3; n > 0; n--) {
     this.spawnObj(new Gem(), this.allGems);
+  }
+  // Spawn n rocks
+  for (var n = 3; n > 0; n--) {
+    this.spawnObj(new Rock(), this.allRocks);
   }
   // Start spawning enemies
   this.stopWatch('start');

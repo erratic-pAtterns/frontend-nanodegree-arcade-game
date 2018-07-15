@@ -93,9 +93,6 @@ var Engine = (function(global) {
         game.allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-        game.allGems.forEach(function(gem) {
-            gem.update();
-        });
         game.player.update();
     }
 
@@ -157,6 +154,9 @@ var Engine = (function(global) {
         });
         game.allEnemies.forEach(function(enemy) {
           enemy.render();
+        });
+        game.allRocks.forEach(function(rock) {
+          rock.render();
         });
         game.player.render();
     }
