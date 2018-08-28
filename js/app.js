@@ -140,8 +140,8 @@ var Gem = function() {
     'images/Gem Blue.png'
   ];
   this.sprite = this.allSprites[Math.floor(Math.random() * this.allSprites.length)];
-  this.x = 101 * (Math.floor(Math.random() * Math.floor(5)));
-  this.y = 83 * (Math.floor(Math.random() * Math.floor(3))) + 45;
+  this.x = 0;
+  this.y = 0;
 };
 
 // Draw the Gem on the screen, required method for game
@@ -156,8 +156,8 @@ Gem.prototype.render = function() {
 
 var Rock = function() {
   this.sprite = 'images/Rock.png';
-  this.x = 101 * (Math.floor(Math.random() * Math.floor(5)));
-  this.y = 83 * (Math.floor(Math.random() * Math.floor(3))) + 45;
+  this.x = 0 // [TODO] nem nem oké pickGridSpot által beállított értéket felülírja
+  this.y = 0; // [TODO] nem nem oké pickGridSpot által beállított értéket felülírja
 };
 
 // Draw the Player on the screen, required method for game
@@ -173,8 +173,19 @@ Rock.prototype.render = function() {
 var Game = function() {
   this.allEnemies = [];
   this.allGems = [];
+  this.allRocks = [];
+  this.streetGrid = [
+    {x: 0, y: 0}, {x: 101, y: 0}, {x: 202, y: 0}, {x: 303, y: 0}, {x: 404, y: 0},
+    {x: 0, y: 83}, {x: 101, y: 83}, {x: 202, y: 83}, {x: 303, y: 83}, {x: 404, y: 83},
+    {x: 0, y: 166}, {x: 101, y: 166}, {x: 202, y: 166}, {x: 303, y: 166}, {x: 404, y: 166}];
   this.player = new Player();
   this.score = 0;
+};
+
+Game.prototype.pickGridSpot = function(obj) {
+  var pos = this.streetGrid.splice(Math.floor(Math.random() * Math.floor(this.streetGrid.length)), 1);
+  obj.x = pos[0].x;
+  obj.y = pos[0].y + 45;
 };
 
 Game.prototype.spawnObj = function(proto, container) {
@@ -204,7 +215,7 @@ Game.prototype.tick = function() {
   this.stopWatch();
 };
 
-// incease player score
+// increase player score
 Game.prototype.scorePlusOne = function() {
   this.score += 1;
 };
@@ -215,13 +226,20 @@ Game.prototype.start = function() {
   this.allEnemies = [];
   this.allGems = [];
   this.allRocks = [];
+  this.streetGrid = [
+    {x: 0, y: 0}, {x: 101, y: 0}, {x: 202, y: 0}, {x: 303, y: 0}, {x: 404, y: 0},
+    {x: 0, y: 83}, {x: 101, y: 83}, {x: 202, y: 83}, {x: 303, y: 83}, {x: 404, y: 83},
+    {x: 0, y: 166}, {x: 101, y: 166}, {x: 202, y: 166}, {x: 303, y: 166}, {x: 404, y: 166}];
+  this.score = 0;
   // Spawn n gems
   for (var n = 3; n > 0; n--) {
     this.spawnObj(new Gem(), this.allGems);
+    this.pickGridSpot(this.allGems[this.allGems.length - 1])
   }
   // Spawn n rocks
   for (var n = 3; n > 0; n--) {
     this.spawnObj(new Rock(), this.allRocks);
+    this.pickGridSpot(this.allRocks[this.allRocks.length - 1])
   }
   // Start spawning enemies
   this.stopWatch('start');
